@@ -1,0 +1,40 @@
+[
+  {
+    "model": "main.property",
+    "pk": 1,
+    "fields": {
+      "name": "Small Villa",
+      "beds": 1,
+      "price": 55.50,
+      "roomType": "Double",
+      "rating": 5,
+      "location": "United Kingdom",
+      "lat": 55.876885,
+      "lng": -4.347243,
+      "maxGuests": 2,
+      "rooms": 1,
+      "details": "This small villa in the country side of Fife provided all the amenities you need to have a relaxed and care-free holiday.",
+      "imgUrl": "https://via.placeholder.com/600/92c952"
+    }
+  },
+  {
+    "model": "main.user",
+    "pk": 1,
+    "fields": {
+      "firstName": "Paul",
+      "lastName": "McCartney",
+      "email": "paul@McCartney.com",
+      "properties": null
+    }
+  },
+  {
+    "model": "main.booking",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "property": 1,
+      "startDate": "2019-09-01T15:00:00+01:00",
+      "endDate": "2019-09-05T15:00:00+01:00"
+    }
+  }
+]

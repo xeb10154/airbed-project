@@ -3,7 +3,7 @@
     "model": "main.property",
     "pk": 1,
     "fields": {
-      "name": "Small Villa",
+      "name": "Small Vintage Villa",
       "beds": 1,
       "price": 55.50,
       "roomType": "Double",
@@ -13,7 +13,7 @@
       "lng": -4.347243,
       "maxGuests": 2,
       "rooms": 1,
-      "details": "This small villa in the country side of Fife provided all the amenities you need to have a relaxed and care-free holiday.",
+      "details": "This small villa in the country side of Fife provides all the amenities you need to have a relaxed and care-free holiday.",
       "imgUrl": "https://via.placeholder.com/600/92c952"
     }
   },
@@ -23,8 +23,7 @@
     "fields": {
       "firstName": "Paul",
       "lastName": "McCartney",
-      "email": "paul@McCartney.com",
-      "properties": null
+      "email": "paul@McCartney.com"
     }
   },
   {

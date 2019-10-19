@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 
 import json
+from datetimerange import DateTimeRange
 from rest_framework import generics
 from main.models import *
 from main.serializers import (UserSerializer,
@@ -32,6 +33,16 @@ def book(request, property_id):
     body = json.loads(request.body)
     startDate = body['startDate']
     endDate = body['endDate']
+
+    bookingsList = Booking.objects.filter(property_id=1)
+
+    inserted_range = DateTimeRange(startDate, endDate)
+
+    # create range object and compare
+    for booking in bookingsList:
+        booking_range = DateTimeRange(booking.startDate, booking.endDate)
+        if inserted_range.is_intersection(booking_range):
+            return HttpResponse('This date range is already booked!')
 
     try:
         # Check current user id is not null and assign value

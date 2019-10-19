@@ -1,3 +1,8 @@
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+
+import json
 from rest_framework import generics
 from main.models import *
 from main.serializers import (UserSerializer,
@@ -18,3 +23,24 @@ class PropertyListCreate(generics.ListCreateAPIView):
 class BookingListCreate(generics.ListCreateAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+
+
+@csrf_exempt
+def book(request, property_id):
+
+    property = get_object_or_404(Property, pk=property_id)
+    body = json.loads(request.body)
+    startDate = body['startDate']
+    endDate = body['endDate']
+
+    try:
+        # Check current user id is not null and assign value
+        # User.logged_in != None
+        user = User.objects.get(pk=1)
+    except (KeyError, Choice.DoesNotExist):
+        return HttpResponseNotFound("You need to be logged in to book a property.")
+    else:
+        booking = Booking.objects.create(
+            user=user, property=property, startDate=startDate, endDate=endDate)
+        booking.save()
+        return HttpResponse(f'Booking for {property} is successful')

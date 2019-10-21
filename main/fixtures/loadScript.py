@@ -8,15 +8,45 @@ prop1 = Property(name="Small Vintage Villa",
                  price=55.50,
                  roomType="Double",
                  rating=5,
-                 location="United Kingdom",
+                 address="23 Earl St, Glasgow, G14 0BA, UK",
                  lat=55.876885,
                  lng=-4.347243,
                  maxGuests=2,
                  rooms=1,
                  details="This small villa in the country side of Fife provides all the amenities you need to have a relaxed and care-free holiday.",
-                 imgUrl="https://via.placeholder.com/600/92c952"
+                 imgUrl="https://via.placeholder.com/300/0000FF/808080?text=Raymond"
                  )
 prop1.save()
+
+prop2 = Property(name="Modern City Flat",
+                 beds=2,
+                 price=120.00,
+                 roomType="Double",
+                 rating=4,
+                 address="23 Earl St, Glasgow, G14 0BA, UK",
+                 lat=55.876885,
+                 lng=-4.347243,
+                 maxGuests=4,
+                 rooms=2,
+                 details="Spend you weekend in the liveliest city in Scotland!.",
+                 imgUrl="https://via.placeholder.com/300/0000FF/808080?text=Rique"
+                 )
+prop2.save()
+
+prop3 = Property(name="Downton Fucking Abbey",
+                 beds=40,
+                 price=3500.00,
+                 roomType="Master",
+                 rating=5,
+                 address="23 Earl St, Glasgow, G14 0BA, UK",
+                 lat=55.876885,
+                 lng=-4.347243,
+                 maxGuests=80,
+                 rooms=40,
+                 details="Biggest mansion you'll find on this website.",
+                 imgUrl="https://via.placeholder.com/300/0000FF/808080?text=Mansion"
+                 )
+prop3.save()
 
 user1 = User(firstName="Raymond",
              lastName="Yau",

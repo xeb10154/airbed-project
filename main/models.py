@@ -13,7 +13,7 @@ class Property(models.Model):
     price = models.DecimalField(decimal_places=2, max_digits=10)
     roomType = models.CharField(max_length=100)
     rating = models.IntegerField()
-    location = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
     lng = models.DecimalField(decimal_places=2, max_digits=6)
     lat = models.DecimalField(decimal_places=2, max_digits=6)
     maxGuests = models.IntegerField(blank=False)

@@ -21,6 +21,11 @@ class PropertyListCreate(generics.ListCreateAPIView):
     serializer_class = PropertySerializer
 
 
+class PropertyDetailView(generics.RetrieveAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertySerializer
+
+
 class BookingListCreate(generics.ListCreateAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer

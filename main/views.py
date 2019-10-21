@@ -52,6 +52,8 @@ def book(request, property_id):
     try:
         # Check current user id is not null and assign value
         # User.logged_in != None
+        # This will eventually need to get_model_user() ID from current logged in user
+        # Currently hardcoded.
         user = User.objects.get(pk=1)
     except (KeyError, Choice.DoesNotExist):
         return HttpResponseNotFound("You need to be logged in to book a property.")

@@ -1,0 +1,27 @@
+{
+  "name": "Airbed project",
+  "description": "Airbed project deployed to Heroku",
+  "image": "heroku/python",
+  "repository": "https://github.com/xeb10154/airbed-project",
+  "keywords": [
+    "python",
+    "django"
+  ],
+  "addons": [
+    "heroku-postgresql"
+  ],
+  "env": {
+    "SECRET_KEY": {
+      "description": "1w2lza!7$3b4@3b_$*)q!!b97+tctquy2ruibu6m_w_(b*qm)-",
+      "generator": "secret"
+    }
+  },
+  "environments": {
+    "test": {
+      "scripts": {
+        "test-setup": "python manage.py collectstatic --noinput",
+        "test": "python manage.py test"
+      }
+    }
+  }
+}

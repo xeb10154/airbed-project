@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 import json
 from datetimerange import DateTimeRange
@@ -35,6 +35,13 @@ class BookingListCreate(generics.ListCreateAPIView):
 class ExperienceListCreate(generics.ListCreateAPIView):
     queryset = Experience.objects.all()
     serializer_class = ExperienceSerializer
+
+
+def locations(request):
+    return JsonResponse({'locationData': [
+        'Glasgow', 'Edinburgh', 'Stirling'
+    ]
+    })
 
 
 @csrf_exempt

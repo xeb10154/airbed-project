@@ -1,7 +1,7 @@
 from datetime import datetime
 import pytz
 from django.utils import timezone
-from main.models import User, Property, Booking
+from main.models import User, Property, Booking, Experience
 
 prop1 = Property(name="Small Vintage Villa",
                  beds=1,
@@ -62,3 +62,23 @@ booking1 = Booking(user=user1,
                        2019, 9, 25, 15, 0, 0, 127325, tzinfo=pytz.UTC)
                    )
 booking1.save()
+
+experience1 = Experience(title='Tour bus in the city!',
+                         location='Glasgow',
+                         category='Tour',
+                         description='Tour the city with our experienced guides. We can speak 8 different languages!',
+                         price=59.99,
+                         imgUrl="https://via.placeholder.com/300/0000FF/808080?text=BusTour"
+                         )
+
+experience1.save()
+
+experience2 = Experience(title='Mountain climbing!',
+                         location='Loch Lomond',
+                         category='Outdoors',
+                         description='Enjoy the scenery with our group of outdoor enthusiasts!',
+                         price='0.00',
+                         imgUrl="https://via.placeholder.com/300/0000FF/808080?text=Mountains"
+                         )
+
+experience2.save()

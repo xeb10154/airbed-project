@@ -18,4 +18,7 @@ urlpatterns = [
 
     # GET: Return a list of all bookings from the db
     path('api/booking/', views.BookingListCreate.as_view()),
+
+    # GET: Return a list of all experiences from the db
+    path('api/experience/', views.ExperienceListCreate.as_view(),)
 ]

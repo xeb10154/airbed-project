@@ -8,7 +8,8 @@ from rest_framework import generics
 from main.models import *
 from main.serializers import (UserSerializer,
                               PropertySerializer,
-                              BookingSerializer)
+                              BookingSerializer,
+                              ExperienceSerializer)
 
 
 class UserListCreate(generics.ListCreateAPIView):
@@ -28,6 +29,11 @@ class PropertyDetailView(generics.RetrieveAPIView):
 
 class BookingListCreate(generics.ListCreateAPIView):
     queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+
+
+class ExperienceListCreate(generics.ListCreateAPIView):
+    queryset = Experience.objects.all()
     serializer_class = BookingSerializer
 
 

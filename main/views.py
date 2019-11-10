@@ -34,7 +34,7 @@ class BookingListCreate(generics.ListCreateAPIView):
 
 class ExperienceListCreate(generics.ListCreateAPIView):
     queryset = Experience.objects.all()
-    serializer_class = BookingSerializer
+    serializer_class = ExperienceSerializer
 
 
 @csrf_exempt

@@ -9,7 +9,8 @@ from main.models import *
 from main.serializers import (UserSerializer,
                               PropertySerializer,
                               BookingSerializer,
-                              ExperienceSerializer)
+                              ExperienceSerializer,
+                              LocationSerializer)
 
 
 class UserListCreate(generics.ListCreateAPIView):
@@ -37,11 +38,14 @@ class ExperienceListCreate(generics.ListCreateAPIView):
     serializer_class = ExperienceSerializer
 
 
-def locations(request):
-    return JsonResponse({'locationData': [
-        'Glasgow', 'Edinburgh', 'Stirling'
-    ]
-    })
+class LocationListView(generics.ListAPIView):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+
+    # return JsonResponse({'locationData': [
+    #     'Glasgow', 'Edinburgh', 'Stirling'
+    # ]
+    # })
 
 
 @csrf_exempt

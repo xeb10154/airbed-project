@@ -6,6 +6,16 @@ from django.utils import timezone
 # Create your models here.
 
 
+class Location(models.Model):
+
+    city = models.CharField(max_length=255, null=True)
+    country = models.CharField(max_length=255, null=True)
+    imgUrl = models.CharField(max_length=255, null=True)
+
+    def __str__(self):
+        return self.city
+
+
 class Property(models.Model):
 
     name = models.CharField(max_length=100)
@@ -14,6 +24,8 @@ class Property(models.Model):
     roomType = models.CharField(max_length=100)
     rating = models.IntegerField()
     address = models.CharField(max_length=100)
+    location = models.ForeignKey(
+        'Location', on_delete=models.CASCADE, null=True)
     lng = models.DecimalField(decimal_places=2, max_digits=6)
     lat = models.DecimalField(decimal_places=2, max_digits=6)
     maxGuests = models.IntegerField(blank=False)

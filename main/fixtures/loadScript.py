@@ -1,7 +1,30 @@
 from datetime import datetime
 import pytz
 from django.utils import timezone
-from main.models import User, Property, Booking, Experience
+from main.models import User, Property, Booking, Experience, Location
+
+
+location1 = Location(city='Glasgow',
+                     country='UK',
+                     imgUrl="https://via.placeholder.com/300/0000FF/808080?text=GlasgowCityImage"
+                     )
+
+location1.save()
+
+location2 = Location(city='Edinburgh',
+                     country='UK',
+                     imgUrl="https://via.placeholder.com/300/0000FF/808080?text=EdinburghCityImage"
+                     )
+
+location2.save()
+
+location3 = Location(city='Stirling',
+                     country='UK',
+                     imgUrl="https://via.placeholder.com/300/0000FF/808080?text=StirlingCityImage"
+                     )
+
+location3.save()
+
 
 prop1 = Property(name="Small Vintage Villa",
                  beds=1,
@@ -9,6 +32,7 @@ prop1 = Property(name="Small Vintage Villa",
                  roomType="Double",
                  rating=5,
                  address="23 Earl St, Glasgow, G14 0BA, UK",
+                 location=location1,
                  lat=55.876885,
                  lng=-4.347243,
                  maxGuests=2,
@@ -23,9 +47,10 @@ prop2 = Property(name="Modern City Flat",
                  price=120.00,
                  roomType="Double",
                  rating=4,
-                 address="23 Earl St, Glasgow, G14 0BA, UK",
-                 lat=55.876885,
-                 lng=-4.347243,
+                 address="38 Castle Terrace, Edinburgh, EH3 9DZ, UK",
+                 location=location2,
+                 lat=55.947178,
+                 lng=-3.201734,
                  maxGuests=4,
                  rooms=2,
                  details="Spend you weekend in the liveliest city in Scotland!.",
@@ -38,7 +63,8 @@ prop3 = Property(name="Downton Fucking Abbey",
                  price=3500.00,
                  roomType="Master",
                  rating=5,
-                 address="23 Earl St, Glasgow, G14 0BA, UK",
+                 address="32D Cowane St, Stirling, FK8 1JR, UK",
+                 location=location3,
                  lat=55.876885,
                  lng=-4.347243,
                  maxGuests=80,

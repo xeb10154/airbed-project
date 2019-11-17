@@ -1,10 +1,12 @@
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+from django.conf import settings
 
+import requests
 import json
 from datetimerange import DateTimeRange
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from main.models import *
 from main.serializers import (UserSerializer,
                               PropertySerializer,
@@ -18,9 +20,41 @@ class UserListCreate(generics.ListCreateAPIView):
     serializer_class = UserSerializer
 
 
-class PropertyListCreate(generics.ListCreateAPIView):
+class PropertyListCreate(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
+
+    def perform_create(self, serializer):
+
+        # The POST request will come with JSON payload of number, street, city and postcode
+        formData = self.request.data
+        number = formData['number']
+        street = formData['street']
+        city = formData['city']
+
+        res = requests.get(
+            f'https://maps.googleapis.com/maps/api/geocode/json?address={number} {street},+{city}&key={settings.GEOCODING_API_KEY}')
+
+        resData = res.json()['results'][0]
+
+        # response body contains geocoding data
+        geoAddress = resData['formatted_address']
+        geoData = resData['address_components']
+        lat = resData['geometry']['location']['lat']
+        lng = resData['geometry']['location']['lng']
+        geoCity = geoData[2]['long_name']
+        geoCountry = geoData[5]['long_name']
+
+        locationExists = Location.objects.filter(city=geoCity).exists()
+        if not locationExists:
+            Location.objects.create(city=geoCity, country=geoCountry)
+
+        location = Location.objects.get(city=geoCity)
+
+        serializer.save(location=location,
+                        address=geoAddress,
+                        lat=lat,
+                        lng=lng)
 
 
 class PropertyDetailView(generics.RetrieveAPIView):

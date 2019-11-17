@@ -26,7 +26,7 @@ SECRET_KEY = '1w2lza!7$3b4@3b_$*)q!!b97+tctquy2ruibu6m_w_(b*qm)-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.ngrok.io', 'localhost']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -131,3 +131,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = "/static/"
 
 django_heroku.settings(locals())
+
+# Google APIs
+GEOCODING_API_KEY = 'AIzaSyAyblU4n8bUhiaXRBbbMB41zQbhksM7CSc'

@@ -22,8 +22,8 @@ class Property(models.Model):
     beds = models.IntegerField(blank=False)
     price = models.DecimalField(decimal_places=2, max_digits=10)
     roomType = models.CharField(max_length=100)
-    rating = models.IntegerField()
-    address = models.CharField(max_length=100)
+    rating = models.IntegerField(null=True)
+    address = models.CharField(max_length=100, null=True)
     location = models.ForeignKey(
         'Location', on_delete=models.CASCADE, null=True)
     lng = models.DecimalField(decimal_places=2, max_digits=6)

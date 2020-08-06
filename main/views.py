@@ -2,11 +2,17 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
+from django.db.models import Q
+
 
 import requests
 import json
+
 from datetimerange import DateTimeRange
-from rest_framework import generics, viewsets
+from datetime import datetime
+from rest_framework import generics, viewsets, status
+from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from main.models import *
 from main.serializers import (UserSerializer,
                               PropertySerializer,
@@ -15,101 +21,149 @@ from main.serializers import (UserSerializer,
                               LocationSerializer)
 
 
-class UserListCreate(generics.ListCreateAPIView):
+class SetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 20
+
+
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def destroy(self, request, pk=None):
+        # Overriding the destroy method to stop delete requests through the API
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
-class PropertyListCreate(viewsets.ModelViewSet):
+
+class PropertyViewSet(viewsets.ModelViewSet):
+    # This is the property list view when user is not logged in
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
+    pagination_class = SetPagination
 
-    def perform_create(self, serializer):
+    def _params_to_ints(self, qs):
+        """Convert a list of string IDs to a list of integers"""
+        return [int(str_id) for str_id in qs.split(',')]
 
-        # The POST request will come with JSON payload of number, street, city and postcode
-        formData = self.request.data
-        number = formData['number']
-        street = formData['street']
-        city = formData['city']
+    def get_queryset(self):
+        """Retrieve the recipes for the authenticated user"""
+        locations = self.request.query_params.get('location')
+        startDate = self.request.data.get('startDate')
+        endDate = self.request.data.get('endDate')
 
-        res = requests.get(
-            f'https://maps.googleapis.com/maps/api/geocode/json?address={number} {street},+{city}&key={settings.GEOCODING_API_KEY}')
+        queryset = self.queryset
+        if locations:
+            location_ids = self._params_to_ints(locations)
+            queryset = queryset.filter(location__id__in=location_ids)
+        if startDate and endDate:
+            startA = datetime.datetime.strptime(
+                startDate, '%Y-%m-%dT%H:%M:%S.%f%z')
+            endA = datetime.datetime.strptime(
+                endDate, '%Y-%m-%dT%H:%M:%S.%f%z')
+            queryset = queryset.filter(
+                Q(bookings__startDate__gt=endA) |
+                Q(bookings__endDate__lt=startA))
 
-        resData = res.json()['results'][0]
+        return queryset
 
-        # response body contains geocoding data
-        geoAddress = resData['formatted_address']
-        geoData = resData['address_components']
-        lat = resData['geometry']['location']['lat']
-        lng = resData['geometry']['location']['lng']
-        geoCity = geoData[2]['long_name']
-        geoCountry = geoData[5]['long_name']
+    def destroy(self, request, pk=None):
+        # Overriding the destroy method to stop delete requests through the API
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
-        locationExists = Location.objects.filter(city=geoCity).exists()
-        if not locationExists:
-            Location.objects.create(city=geoCity, country=geoCountry)
+    # def perform_create(self, serializer):
 
-        location = Location.objects.get(city=geoCity)
+    #     # The POST request will come with JSON payload of number, street, city and postcode
+    #     formData = self.request.data
+    #     number = formData.get('number')
+    #     street = formData.get('street')
+    #     city = formData.get('city')
 
-        serializer.save(location=location,
-                        address=geoAddress,
-                        lat=lat,
-                        lng=lng)
+    #     res = requests.get(
+    #         f'https://maps.googleapis.com/maps/api/geocode/json?address={number} {street},+{city}&key={settings.GEOCODING_API_KEY}')
+
+    #     resData = res.json()['results'][0]
+
+    #     # response body contains geocoding data
+    #     geoAddress = resData['formatted_address']
+    #     geoData = resData['address_components']
+    #     lat = resData['geometry']['location']['lat']
+    #     lng = resData['geometry']['location']['lng']
+    #     geoCity = geoData[2]['long_name']
+    #     geoCountry = geoData[5]['long_name']
+
+    #     locationExists = Location.objects.filter(city=geoCity).exists()
+    #     if not locationExists:
+    #         Location.objects.create(city=geoCity, country=geoCountry)
+
+    #     location = Location.objects.get(city=geoCity)
+
+    #     serializer.save(location=location,
+    #                     address=geoAddress,
+    #                     lat=lat,
+    #                     lng=lng)
 
 
-class PropertyDetailView(generics.RetrieveAPIView):
-    queryset = Property.objects.all()
-    serializer_class = PropertySerializer
-
-
-class BookingListCreate(generics.ListCreateAPIView):
+class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
+    def get_queryset(self):
+        """Retrieve the recipes for the authenticated user"""
+        # Logic to be added to return an array of existing bookings
+        # on a selected property (array of date ranges)
+        # Use generic.viewset plus retrieveMixin (look into detail views)
 
-class ExperienceListCreate(generics.ListCreateAPIView):
+        # The user id is hardcoded to be 1 since no login system exist
+        return self.queryset.filter(user_id=1, cancel=False)
+
+    def create(self, request, *args, **kwargs):
+        u = {'user': 1}
+        data = request.data
+        data.update(u)
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        # Get submitted dates and property id
+        startDate = self.request.data.get('startDate')
+        endDate = self.request.data.get('endDate')
+        propId = self.request.data.get('property')
+
+        # retrieve list of bookings for this property
+        bookingsList = self.queryset.filter(property_id=propId)
+        # Create date range from request
+        inserted_range = DateTimeRange(startDate, endDate)
+
+        # Compare ranges for booking overlaps
+        for booking in bookingsList:
+            booking_range = DateTimeRange(booking.startDate, booking.endDate)
+            if inserted_range.is_intersection(booking_range):
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
+
+    def destroy(self, request, pk=None):
+        # Overriding the destroy method to stop delete requests through the API
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
+
+class ExperienceViewSet(viewsets.ModelViewSet):
     queryset = Experience.objects.all()
     serializer_class = ExperienceSerializer
 
+    def destroy(self, request, pk=None):
+        # Overriding the destroy method to stop delete requests through the API
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
-class LocationListView(generics.ListAPIView):
+
+class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
 
-    # return JsonResponse({'locationData': [
-    #     'Glasgow', 'Edinburgh', 'Stirling'
-    # ]
-    # })
-
-
-@csrf_exempt
-def book(request, property_id):
-
-    property = get_object_or_404(Property, pk=property_id)
-    body = json.loads(request.body)
-    startDate = body['startDate']
-    endDate = body['endDate']
-
-    bookingsList = Booking.objects.filter(property_id=1)
-
-    inserted_range = DateTimeRange(startDate, endDate)
-
-    # create range object and compare
-    for booking in bookingsList:
-        booking_range = DateTimeRange(booking.startDate, booking.endDate)
-        if inserted_range.is_intersection(booking_range):
-            return HttpResponse('This date range is already booked!')
-
-    try:
-        # Check current user id is not null and assign value
-        # User.logged_in != None
-        # This will eventually need to get_model_user() ID from current logged in user
-        # Currently hardcoded.
-        user = User.objects.get(pk=1)
-    except (KeyError, Choice.DoesNotExist):
-        return HttpResponseNotFound("You need to be logged in to book a property.")
-    else:
-        booking = Booking.objects.create(
-            user=user, property=property, startDate=startDate, endDate=endDate)
-        booking.save()
-        return HttpResponse(f'Booking for {property} is successful')
+    def destroy(self, request, pk=None):
+        # Overriding the destroy method to stop delete requests through the API
+        return Response(status=status.HTTP_403_FORBIDDEN)

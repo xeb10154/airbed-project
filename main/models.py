@@ -41,7 +41,7 @@ class Rating(models.Model):
     score = models.IntegerField(blank=False)
 
     def __str__(self):
-        return self.score
+        return f'{self.score}'
 
 
 class Booking(models.Model):

@@ -4,13 +4,12 @@ from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.db.models import Q
 
-
 import requests
 import json
 
 from datetimerange import DateTimeRange
 from datetime import datetime
-from rest_framework import generics, viewsets, status
+from rest_framework import generics, viewsets, status, mixins
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from main.models import *
@@ -46,6 +45,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
         """Convert a list of string IDs to a list of integers"""
         return [int(str_id) for str_id in qs.split(',')]
 
+    # def get_ids(obs):
+    #     """Get ids from an array of objects"""
+    #     return obs.id
+
     def get_queryset(self):
         """Retrieve the recipes for the authenticated user"""
         locations = self.request.query_params.get('location')
@@ -66,6 +69,24 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 Q(bookings__endDate__lt=startA))
 
         return queryset
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     # Retrieve property instance
+    #     instance = self.get_object()
+    #     # Get array of associated booking ids
+    #     bookings = instance.bookings
+    #     # Get the id of each booking object
+    #     booking_ids = map(self.get_ids, bookings)
+    #     # Retrieve those associated booking objects
+    #     bookingQueryset = Booking.objects.filter(id__in=booking_ids)
+    #     # Replace Booking ids in Property Queryset with actual booking values
+    #     instance.booking = []
+    #     for booking in bookingQueryset:
+    #         instance.booking.append(booking)
+
+    #     # How do I return the updated queryset as a json?
+
+    #     return Response(instance.s)
 
     def destroy(self, request, pk=None):
         # Overriding the destroy method to stop delete requests through the API
@@ -112,9 +133,11 @@ class BookingViewSet(viewsets.ModelViewSet):
         """Retrieve the recipes for the authenticated user"""
         # Logic to be added to return an array of existing bookings
         # on a selected property (array of date ranges)
-        # Use generic.viewset plus retrieveMixin (look into detail views)
+
+        # Add it here or use .list()?
 
         # The user id is hardcoded to be 1 since no login system exist
+        # Returned bookings are not cancelled.
         return self.queryset.filter(user_id=1, cancel=False)
 
     def create(self, request, *args, **kwargs):
@@ -149,6 +172,26 @@ class BookingViewSet(viewsets.ModelViewSet):
     def destroy(self, request, pk=None):
         # Overriding the destroy method to stop delete requests through the API
         return Response(status=status.HTTP_403_FORBIDDEN)
+
+
+class GetAllBookingsForPropertyID(viewsets.ViewSet, mixins.ListModelMixin):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.queryset
+
+        propId = self.request.query_params.get('property')
+
+        if not propId:
+            return Response(
+                data={"error": "Key 'property' not found in request query params"},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        queryset = queryset.filter(Q(property__id=propId) & Q(cancel=False))
+
+        serializer = BookingSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class ExperienceViewSet(viewsets.ModelViewSet):

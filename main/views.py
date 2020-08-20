@@ -37,11 +37,13 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_403_FORBIDDEN)
 
 
-class ReviewViewSet(viewsets.ViewSet, mixins.ListModelMixin):
+class ReviewViewSet(viewsets.GenericViewSet,
+                    mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         queryset = self.queryset
 
         propId = self.request.query_params.get('property')
@@ -51,14 +53,10 @@ class ReviewViewSet(viewsets.ViewSet, mixins.ListModelMixin):
                 data={"error": "Key 'property' not found in request query params"},
                 status=status.HTTP_400_BAD_REQUEST)
 
-        queryset = queryset.filter(Q(reviews__property=propId))
+        queryset = queryset.filter(Q(bookings__property=propId))
 
         serializer = ReviewSerializer(queryset, many=True)
         return Response(serializer.data)
-
-    def destroy(self, request, pk=None):
-        # Overriding the destroy method to stop delete requests through the API
-        return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 class PropertyViewSet(viewsets.ModelViewSet):
@@ -95,24 +93,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 Q(bookings__endDate__lt=startA))
 
         return queryset
-
-    # def retrieve(self, request, *args, **kwargs):
-    #     # Retrieve property instance
-    #     instance = self.get_object()
-    #     # Get array of associated booking ids
-    #     bookings = instance.bookings
-    #     # Get the id of each booking object
-    #     booking_ids = map(self.get_ids, bookings)
-    #     # Retrieve those associated booking objects
-    #     bookingQueryset = Booking.objects.filter(id__in=booking_ids)
-    #     # Replace Booking ids in Property Queryset with actual booking values
-    #     instance.booking = []
-    #     for booking in bookingQueryset:
-    #         instance.booking.append(booking)
-
-    #     # How do I return the updated queryset as a json?
-
-    #     return Response(instance.s)
 
     def destroy(self, request, pk=None):
         # Overriding the destroy method to stop delete requests through the API
@@ -209,7 +189,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_403_FORBIDDEN)
 
 
-class GetAllBookingsForPropertyID(viewsets.ViewSet, mixins.ListModelMixin):
+class GetAllBookingsForPropertyID(viewsets.GenericViewSet, mixins.ListModelMixin):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 

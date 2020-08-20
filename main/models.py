@@ -57,7 +57,7 @@ class Rating(models.Model):
 
 class Review(models.Model):
     rating = models.ForeignKey(
-        'Rating', related_name='review', on_delete=models.CASCADE)
+        'Rating', related_name='reviews', on_delete=models.CASCADE)
     user = models.CharField(max_length=128)
     description = models.CharField(max_length=1000, null=True)
 

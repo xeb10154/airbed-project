@@ -15,6 +15,15 @@ class Location(models.Model):
         return self.city
 
 
+class Gallery(models.Model):
+    name = models.CharField(max_length=100)
+    property = models.ForeignKey(
+        'Property', related_name='media', on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Property(models.Model):
     # An addtional one-to-many field for user -> property should be
     # added to show ownership of the property created by a user.
@@ -30,8 +39,10 @@ class Property(models.Model):
     lat = models.DecimalField(decimal_places=2, max_digits=6)
     maxGuests = models.IntegerField(blank=False)
     rooms = models.IntegerField(blank=False)
-    details = models.CharField(max_length=500)
-    imgUrl = models.CharField(max_length=500)
+    tagline = models.CharField(max_length=500)
+    info = models.CharField(max_length=1000, null=True)
+    img = models.ForeignKey(
+        'Gallery', related_name='thumbnail', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
@@ -44,13 +55,23 @@ class Rating(models.Model):
         return f'{self.score}'
 
 
+class Review(models.Model):
+    rating = models.ForeignKey(
+        'Rating', related_name='review', on_delete=models.CASCADE)
+    user = models.CharField(max_length=128)
+    description = models.CharField(max_length=1000, null=True)
+
+    def __str__(self):
+        return self.description
+
+
 class Booking(models.Model):
     user = models.ForeignKey(
         'User', related_name='bookings', on_delete=models.SET_NULL, null=True)
     property = models.ForeignKey(
         'Property', related_name='bookings', on_delete=models.SET_NULL, null=True)
-    rating = models.ForeignKey(
-        'Rating', related_name='ratings', on_delete=models.CASCADE, null=True)
+    review = models.ForeignKey(
+        'Review', related_name='bookings', on_delete=models.CASCADE, null=True)
     startDate = models.DateTimeField()
     endDate = models.DateTimeField()
     cancel = models.BooleanField(default=False)

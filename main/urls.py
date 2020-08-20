@@ -10,6 +10,8 @@ router.register('booking', views.BookingViewSet)
 router.register('location', views.LocationViewSet)
 router.register('user', views.UserViewSet)
 router.register('experience', views.ExperienceViewSet)
+router.register('review',
+                views.ReviewViewSet)
 router.register('getAllBookingsForPropertyID',
                 views.GetAllBookingsForPropertyID)
 

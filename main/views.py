@@ -17,7 +17,9 @@ from main.serializers import (UserSerializer,
                               PropertySerializer,
                               BookingSerializer,
                               ExperienceSerializer,
-                              LocationSerializer)
+                              LocationSerializer,
+                              ReviewSerializer,
+                              GallerySerializer)
 
 
 class SetPagination(PageNumberPagination):
@@ -29,6 +31,30 @@ class SetPagination(PageNumberPagination):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def destroy(self, request, pk=None):
+        # Overriding the destroy method to stop delete requests through the API
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
+
+class ReviewViewSet(viewsets.ViewSet, mixins.ListModelMixin):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+    def list(self, request):
+        queryset = self.queryset
+
+        propId = self.request.query_params.get('property')
+
+        if not propId:
+            return Response(
+                data={"error": "Key 'property' not found in request query params"},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        queryset = queryset.filter(Q(reviews__property=propId))
+
+        serializer = ReviewSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def destroy(self, request, pk=None):
         # Overriding the destroy method to stop delete requests through the API
@@ -123,6 +149,15 @@ class PropertyViewSet(viewsets.ModelViewSet):
     #                     address=geoAddress,
     #                     lat=lat,
     #                     lng=lng)
+
+
+class GalleryViewSet(viewsets.ModelViewSet):
+    queryset = Gallery
+    serializer_class = GallerySerializer
+
+    def destroy(self, request, pk=None):
+        # Overriding the destroy method to stop delete requests through the API
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 class BookingViewSet(viewsets.ModelViewSet):
